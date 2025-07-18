@@ -161,7 +161,7 @@
           "parameters": [
             {
               "name": "x-api-key",
-              "value": "SUPADATA_API_KEY"
+              "value": "[SUPADATA_API_KEY]"
             }
           ]
         },
