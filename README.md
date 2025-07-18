@@ -1,37 +1,71 @@
-# 📡 YouTube-First Sermon Publishing Automation (n8n Workflow)
+# 📡 YouTube to WordPress Workflow (n8n Workflow)
 
-This repository contains a no-code/low-code workflow built with **n8n** as part of my internship. The goal is to automate a **YouTube-first content publishing pipeline** for sermons or devotional media — reducing manual tasks, improving turnaround time, and increasing consistency across platforms.
+This repository contains a no-code/low-code workflow built with **n8n** as part of my internship. The goal is to automate a **YouTube-to-WordPress content publishing pipeline** for sermons or devotional media — reducing manual tasks, improving turnaround time, and increasing consistency across platforms.
 
-![AI Workflow Automation](https://github.com/user-attachments/assets/b8c6edb6-0959-4e35-b7a8-3e0b8129520d)
+<img width="1694" height="702" alt="yt-to-wp" src="https://github.com/user-attachments/assets/5895cddc-3984-4089-9827-7aa4dd8bc74d" />
 
 ---
 
 ## ✨ Project Overview
 
-This workflow automates the process of receiving a sermon submission, downloading the associated YouTube video, transcribing the audio, and publishing a complete blog post (with embedded video and formatted transcript) on WordPress.
+This workflow automates the process of taking a **YouTube sermon video**, retrieving its transcript, formatting it with AI, and publishing a **draft blog post** on WordPress with the embedded video and clean paragraphs, ready for final edits and publishing.
 
 ---
 
-## ✅ Current Workflow
+## 🔁 Workflow Breakdown
 
-### 🔁 Step-by-step Flow:
-
-1. **Form Submission** – A user submits a form with details and a YouTube link.  
-2. **Google Sheets Logging** – The submitted data is appended to a Google Sheet.  
-3. **YouTube Metadata** – Metadata is fetched from the video to confirm it exists and extract the video ID.  
-4. **Video Download** – The audio from the YouTube video is downloaded via a self-hosted mp3 microservice (powered by `yt-dlp`).  
-5. **Transcription** – The audio file is sent to the [Groq API](https://groq.com) for transcription using an open LLM.  
-6. **Formatting** – The transcript is passed to the OpenAI API (`gpt-3.5-turbo`) to be structured into clean HTML paragraphs.  
-7. **Post Publishing** – A WordPress post is created using the sermon title, YouTube embed, and formatted transcript.
+1. **POST Endpoint Trigger** - Receives a `POST` request containing the YouTube URL.
+2. **Extract YouTube Video ID** - Parses the video ID from the submitted URL using regex.
+3. **YouTube Metadata Retrieval** - Fetches the video title and embed HTML via the YouTube Data API.
+4. **Transcript via Supadata API** - Uses [Supadata.ai](https://supadata.ai) to fetch the full transcript from the YouTube video directly (no downloading required).
+5. **Transcript Consolidation** - Merges transcript segments into a single string for processing.
+6. **GPT-3.5 Transcript Formatting** - Sends the raw transcript to OpenAI GPT-3.5 Turbo to break text into logical, readable paragraphs.
+7. **WordPress Draft Creation** - Publishes a WordPress post (as draft) using the video embed and AI-formatted transcript.
 
 ---
 
-## ⚙️ Tools & Technologies
+## ⚙️ Tools & Services Used
 
-- **n8n** – Workflow automation platform  
-- **YouTube Data API** – To fetch metadata and validate video IDs  
-- **Self-hosted yt-dlp microservice** – Converts YouTube videos to mp3  
-- **Groq API** – Transcribes the mp3 using efficient LLMs  
-- **OpenAI GPT-3.5** – Formats raw transcription into HTML  
-- **WordPress REST API** – Creates a blog post with the video and formatted transcript  
-- **Google Sheets** – Logs each submission for tracking  
+- **n8n** – Workflow orchestration
+- **Supadata API** – Transcription directly from YouTube URL
+- **OpenAI GPT-3.5 Turbo** – Formats transcript for readability
+- **YouTube Data API** – Retrieves video title and embed code
+- **WordPress REST API** – Creates blog post draft with embed + transcript
+
+---
+
+## 🧪 Usage Instructions
+
+To trigger the workflow, send a `POST` request to the webhook URL with the following JSON payload:
+
+```json
+{
+  "url": "https://youtu.be/YOUR_VIDEO_ID"
+}
+```
+
+Example `curl` command:
+
+```bash
+curl -X POST https://your-n8n-instance/webhook/youtube-to-wp \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://youtu.be/abc123XYZ"}'
+```
+
+---
+
+## 🚀 Setup & Deployment
+
+1. Clone this repo and import the workflow into n8n.
+2. Set API keys and credentials:
+   - `YOUTUBE_API_KEY`
+   - `Supadata_API_KEY`
+   - `OPENAI_API_KEY`
+   - `WORDPRESS_AUTH`
+3. Deploy on a persistent instance (e.g., DigitalOcean, Railway, n8n cloud).
+
+---
+
+## 🧾 License
+
+MIT License. See `LICENSE.md`.
