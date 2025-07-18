@@ -1,297 +1,6 @@
 {
+  "name": "YT to WP Workflow",
   "nodes": [
-    {
-      "parameters": {
-        "formTitle": "Sermon Metadata Submission Form",
-        "formDescription": "Please fill out this short form before your livestream or video upload. The information will be used to generate accurate blog posts, social media content, and other materials for your sermon. This helps us ensure everything is ready for review and publishing immediately after the stream.",
-        "formFields": {
-          "values": [
-            {
-              "fieldLabel": "Sermon Title",
-              "requiredField": true
-            },
-            {
-              "fieldLabel": "Speaker Name",
-              "requiredField": true
-            },
-            {
-              "fieldLabel": "Date",
-              "fieldType": "date",
-              "requiredField": true
-            },
-            {
-              "fieldLabel": "Series Name"
-            },
-            {
-              "fieldLabel": "Scripture Reference(s) (Separated by comma)",
-              "placeholder": "John 3:16, Philippians: 4:13, ...",
-              "requiredField": true
-            },
-            {
-              "fieldLabel": "Church Name",
-              "requiredField": true
-            },
-            {
-              "fieldLabel": "YouTube Link",
-              "requiredField": true
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.formTrigger",
-      "typeVersion": 2.2,
-      "position": [
-        0,
-        -180
-      ],
-      "id": "19a647b3-8dbb-4a08-93d7-874a90848f3e",
-      "name": "On form submission",
-      "webhookId": "1c13a1bc-8815-4831-a03d-5786c7c1a25b"
-    },
-    {
-      "parameters": {
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "13gGQ-L9FHYqGSgkQ_--8rSFEBn-dIzcP2QpibhXvPW0",
-          "mode": "list",
-          "cachedResultName": "AI Workflow Automation",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13gGQ-L9FHYqGSgkQ_--8rSFEBn-dIzcP2QpibhXvPW0/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13gGQ-L9FHYqGSgkQ_--8rSFEBn-dIzcP2QpibhXvPW0/edit#gid=0"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "Submitted at": "={{ $json.submittedAt }}",
-            "Sermon Title": "={{ $json['Sermon Title'] }}",
-            "Speaker Name": "={{ $json['Speaker Name'] }}",
-            "Date": "={{ $json.Date }}",
-            "Series Name": "={{ $json['Series Name'] }}",
-            "Scripture References": "={{ $json['Scripture Reference(s) (Separated by comma)'] }}",
-            "Church Name": "={{ $json['Church Name'] }}",
-            "Link": "={{ $json[\"YouTube Link\"] }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "Submitted at",
-              "displayName": "Submitted at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Sermon Title",
-              "displayName": "Sermon Title",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Speaker Name",
-              "displayName": "Speaker Name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Date",
-              "displayName": "Date",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Series Name",
-              "displayName": "Series Name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Scripture References",
-              "displayName": "Scripture References",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Church Name",
-              "displayName": "Church Name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Link",
-              "displayName": "Link",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
-      "position": [
-        220,
-        -180
-      ],
-      "id": "a977cc55-5353-41ba-bbd5-32d709c25c01",
-      "name": "Google Sheets",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "uEqMp9SuO2yPeg7C",
-          "name": "Google Sheets - Joaquin"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "resource": "video",
-        "operation": "get",
-        "videoId": "={{ $json.Link.split(\"v=\")[1] }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.youTube",
-      "typeVersion": 1,
-      "position": [
-        440,
-        -180
-      ],
-      "id": "8b78a316-1477-46a6-830e-e944bd97d289",
-      "name": "YouTube",
-      "credentials": {
-        "youTubeOAuth2Api": {
-          "id": "lSggnTPzpXWI1eoA",
-          "name": "YouTube account 3"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "content": "## Transcription flow\n1. Get YouTube Metadata and confirm video id\n2. Download video\n2.5. Wait for the video to download\n3. Send to Groq for transcription\n4. Send to GPT 3.5 for formatting\n5. Convert transcript into HTML",
-        "height": 400,
-        "width": 1340,
-        "color": 4
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        420,
-        -380
-      ],
-      "id": "7b2e8e9c-6e57-4186-9b74-27fed27f1bd8",
-      "name": "Sticky Note"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "=https://e005-2600-1700-8370-22e0-e8e4-2d1-935-592a.ngrok-free.app/download",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "url",
-              "value": "=https://www.youtube.com/watch?v={{ $json.id }}"
-            }
-          ]
-        },
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "audio"
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        660,
-        -180
-      ],
-      "id": "a6523b67-5678-4c7b-8800-cbf5366f34f4",
-      "name": "Download YT Video"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.groq.com/openai/v1/audio/transcriptions",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "bearer <API-KEY>"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "multipart-form-data",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "parameterType": "formBinaryData",
-              "name": "file",
-              "inputDataFieldName": "audio"
-            },
-            {
-              "name": "model",
-              "value": "whisper-large-v3-turbo"
-            },
-            {
-              "name": "language",
-              "value": "en"
-            }
-          ]
-        },
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1060,
-        -180
-      ],
-      "id": "af3830e9-2337-4032-a8bb-1247a0daa930",
-      "name": "Get Video Transcription"
-    },
     {
       "parameters": {
         "modelId": {
@@ -307,7 +16,7 @@
               "role": "system"
             },
             {
-              "content": "=Here is a transcript of a sermon. It is currently unformatted and difficult to read. Format it into clear, readable paragraphs. Preserve all the original wording and do not summarize or skip any sentences.\n\nTranscript:\n{{ $json.text }}"
+              "content": "=Here is a transcript of a sermon. It is currently unformatted and difficult to read. Format it into clear, readable paragraphs. Preserve all the original wording and do not summarize or skip any sentences.\n\nTranscript:\n{{ $json.script }}"
             }
           ]
         },
@@ -316,10 +25,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        1280,
-        -180
+        1360,
+        180
       ],
-      "id": "8389f332-7f37-466e-a1fb-9b8731aa7f6b",
+      "id": "6ab87995-696d-4aed-b242-f43b7c29b683",
       "name": "OpenAI",
       "credentials": {
         "openAiApi": {
@@ -330,32 +39,81 @@
     },
     {
       "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst rawText = $input.first().json.message.content\nconst paragraphs = rawText\n  .split(/\\n{2,}/)\n  .map(p => `<p>${p.trim()}</p>`)\n  .join('\\n\\n');\n\nconst cleaned = paragraphs.replace(/\\n+/g, '');\n\nreturn [{json: {formattedTranscript: cleaned} }];"
+        "content": "## Wordpress flow\n",
+        "height": 560,
+        "width": 280,
+        "color": 5
       },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1640,
+        1700,
         -180
       ],
-      "id": "fceedebf-8ed0-41cc-b426-6ca25949dc66",
-      "name": "Convert to HTML"
+      "typeVersion": 1,
+      "id": "7e115048-eb15-4fd9-b4c8-48d2ce9aa975",
+      "name": "Sticky Note1"
     },
     {
       "parameters": {
-        "title": "={{ $('Google Sheets').item.json['Sermon Title'] }}",
+        "content": "📝 **Supadata API**\n\nCalls the Supadata API to get the transcript for each video.\n\n**How to change:** Update the API URL or key if the service changes. Modify request headers or parameters for other APIs.",
+        "height": 400,
+        "width": 260,
+        "color": 7
+      },
+      "id": "1344158a-57ea-4844-be95-7e603ce69d2a",
+      "name": "supadata Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        760,
+        -40
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "📜 **script (Code Node)**\n\nCombines the transcript segments into a single script string.\n\n**How to change:** Change logic to format or preprocess the script differently (e.g., filter out certain lines).",
+        "height": 400,
+        "width": 260,
+        "color": 7
+      },
+      "id": "fa1f0ac7-b628-4e66-aa59-6e055ba2c0ae",
+      "name": "scirpt Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1060,
+        -40
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combine all \"text\" fields from the content array into one string\nlet script = '';\n\n// Loop through all input items\nfor (const item of items) {\n  if (item.json.content && Array.isArray(item.json.content)) {\n    for (const segment of item.json.content) {\n      if (segment.text) {\n        script += segment.text + ' ';\n      }\n    }\n  }\n}\n\nscript = script.trim();\n\nreturn [\n  {\n    json: {\n      script\n    }\n  }\n];\n"
+      },
+      "id": "ea9c5adf-bf92-4184-8751-d908e71e48f1",
+      "name": "Combine into one transcript",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1140,
+        180
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "title": "={{ $('Get YouTube Metadata from video ID').item.json.snippet.title }}",
         "additionalFields": {
-          "content": "={{ $('YouTube').item.json.player.embedHtml }} {{ $json.formattedTranscript }}"
+          "content": "={{ $('Get YouTube Metadata from video ID').item.json.player.embedHtml }}\n\n{{ $json.message.content }}",
+          "status": "draft"
         }
       },
       "type": "n8n-nodes-base.wordpress",
       "typeVersion": 1,
       "position": [
-        1860,
-        -180
+        1760,
+        180
       ],
-      "id": "9c30a00f-3864-41ba-a9cb-44f9e49bf814",
-      "name": "Wordpress1",
+      "id": "8ee40661-8949-4acb-a618-1439af978ad9",
+      "name": "Wordpress",
       "credentials": {
         "wordpressApi": {
           "id": "lFYyN14RBwz0R8uh",
@@ -365,79 +123,173 @@
     },
     {
       "parameters": {
-        "content": "## Wordpress flow\nCreate post with sermon title, YT video, and transcription",
-        "height": 380,
-        "width": 280,
-        "color": 5
+        "content": "## YouTube Metadata flow\n",
+        "height": 560,
+        "width": 780,
+        "color": 4
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1800,
-        -360
-      ],
-      "typeVersion": 1,
-      "id": "62c13f22-29cf-42ca-a6cc-11bbdb3f5bac",
-      "name": "Sticky Note1"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        860,
+        -100,
         -180
       ],
-      "id": "577a1065-6a91-444b-9729-20961d87260d",
-      "name": "Wait",
-      "webhookId": "9166814d-74cd-4757-b96d-5dd3dc2a671e"
+      "typeVersion": 1,
+      "id": "0ccf9166-e434-49bf-b472-f08dd98d2884",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Transcription flow\n",
+        "height": 560,
+        "width": 900,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        740,
+        -180
+      ],
+      "typeVersion": 1,
+      "id": "497aed06-59b2-44cd-99c1-f835511dca75",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.supadata.ai/v1/transcript?url=https://youtu.be/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "SUPADATA_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a3db3383-112f-49d5-83c7-4cb5795643af",
+      "name": "Get transcription from Supadata API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        840,
+        180
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "youtube-to-wp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        180
+      ],
+      "id": "2b88430c-b11c-4796-9ac5-b48b8600e504",
+      "name": "Retrieve URL via POST request",
+      "webhookId": "493ec790-6eeb-40fa-8a23-5bee203f2626"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.body.url;\nconst regex = /(?:v=|\\/)([0-9A-Za-z_-]{11})(?:&|$)/;\nconst match = input.match(regex);\n\nif (!match || !match[1]) {\n  throw new Error(\"Invalid YouTube link. Couldn't extract video ID.\");\n}\n\nreturn [{ videoId: match[1] }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        180
+      ],
+      "id": "19c61fca-10c8-4ef4-a2e4-0c39205ab391",
+      "name": "Extract video ID from URL"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.videoId }}",
+        "options": {}
+      },
+      "id": "2c22a18d-bc14-4fb6-93ff-e4973fa1f060",
+      "name": "Get YouTube Metadata from video ID",
+      "type": "n8n-nodes-base.youTube",
+      "position": [
+        480,
+        180
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "lSggnTPzpXWI1eoA",
+          "name": "YouTube account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "**YouTube API** \n\nCalls the YouTube API to get video metadata.\n\n**How to change:** Update the credentials to the desired YouTube account.",
+        "height": 400,
+        "width": 260,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        -40
+      ],
+      "typeVersion": 1,
+      "id": "3a5487a9-dce9-48b6-99aa-e9c4eca0fc57",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "**GPT-3.5 Turbo**\n\nSends transcript to GPT-3.5 Turbo for formatting.\n\n**How to change:** Update the credentials to the desired OpenAI account.",
+        "height": 400,
+        "width": 260,
+        "color": 7
+      },
+      "id": "07e05617-901a-463c-9bd1-05da9d3ad5ba",
+      "name": "scirpt Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1360,
+        -40
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "**POST Endpoint** \n\nWaits for a post request to begin service.\n\n**Format:** \n{\n    \"url\": \"[ENTER_YOUTUBE_URL]\"\n}",
+        "height": 400,
+        "width": 260,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -40
+      ],
+      "typeVersion": 1,
+      "id": "b338b515-e8bb-4024-9feb-be13f011d4d0",
+      "name": "Sticky Note4"
     }
   ],
+  "pinData": {},
   "connections": {
-    "On form submission": {
+    "OpenAI": {
       "main": [
         [
           {
-            "node": "Google Sheets",
+            "node": "Wordpress",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Google Sheets": {
-      "main": [
-        [
-          {
-            "node": "YouTube",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "YouTube": {
-      "main": [
-        [
-          {
-            "node": "Download YT Video",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Download YT Video": {
-      "main": [
-        [
-          {
-            "node": "Wait",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Video Transcription": {
+    "Combine into one transcript": {
       "main": [
         [
           {
@@ -448,33 +300,44 @@
         ]
       ]
     },
-    "OpenAI": {
+    "Get transcription from Supadata API": {
       "main": [
         [
           {
-            "node": "Convert to HTML",
+            "node": "Combine into one transcript",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Convert to HTML": {
+    "Retrieve URL via POST request": {
       "main": [
         [
           {
-            "node": "Wordpress1",
+            "node": "Extract video ID from URL",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait": {
+    "Extract video ID from URL": {
       "main": [
         [
           {
-            "node": "Get Video Transcription",
+            "node": "Get YouTube Metadata from video ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get YouTube Metadata from video ID": {
+      "main": [
+        [
+          {
+            "node": "Get transcription from Supadata API",
             "type": "main",
             "index": 0
           }
@@ -482,9 +345,13 @@
       ]
     }
   },
-  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "f318f1eeb582bef69a56797ad1f28184a54cfe51b0e461ee190c5740946ea07e"
-  }
+  },
+  "tags": []
 }
