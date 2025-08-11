@@ -1,5 +1,4 @@
 {
-  "name": "YT to WP Workflow",
   "nodes": [
     {
       "parameters": {
@@ -12,11 +11,11 @@
         "messages": {
           "values": [
             {
-              "content": "You are a helpful assistant who formats sermon transcripts into clearly structured paragraphs. Maintain the original meaning and flow of the speaker’s words, but break up the text into logical chunks for better readability. Do not summarize or skip any content.",
+              "content": "You are a helpful assistant tasked with formatting sermon transcripts into clean, readable paragraphs. Your job is to improve readability without altering the content. \n\nDo not summarize, omit, rephrase, or add anything. Only format the text into coherent paragraphs. Keep the speaker’s tone and voice intact.\n\nUse proper punctuation and spacing. Avoid long walls of text. Use multiple paragraphs where natural.\n",
               "role": "system"
             },
             {
-              "content": "=Here is a transcript of a sermon. It is currently unformatted and difficult to read. Format it into clear, readable paragraphs. Preserve all the original wording and do not summarize or skip any sentences.\n\nTranscript:\n{{ $json.script }}"
+              "content": "=Format the following transcript into readable paragraphs. Do not remove or change any words. Just insert paragraph breaks where they naturally belong:\n\n{{ $json.chunk }}"
             }
           ]
         },
@@ -25,10 +24,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        1360,
-        180
+        1152,
+        -368
       ],
-      "id": "6ab87995-696d-4aed-b242-f43b7c29b683",
+      "id": "8389f332-7f37-466e-a1fb-9b8731aa7f6b",
       "name": "OpenAI",
       "credentials": {
         "openAiApi": {
@@ -41,16 +40,16 @@
       "parameters": {
         "content": "## Wordpress flow\n",
         "height": 560,
-        "width": 280,
+        "width": 400,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1700,
-        -180
+        1808,
+        -544
       ],
       "typeVersion": 1,
-      "id": "7e115048-eb15-4fd9-b4c8-48d2ce9aa975",
+      "id": "62c13f22-29cf-42ca-a6cc-11bbdb3f5bac",
       "name": "Sticky Note1"
     },
     {
@@ -60,64 +59,35 @@
         "width": 260,
         "color": 7
       },
-      "id": "1344158a-57ea-4844-be95-7e603ce69d2a",
+      "id": "711858cd-4e14-4c43-8ee4-5d15ea78990c",
       "name": "supadata Note1",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        760,
-        -40
+        544,
+        -576
       ],
       "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "content": "📜 **script (Code Node)**\n\nCombines the transcript segments into a single script string.\n\n**How to change:** Change logic to format or preprocess the script differently (e.g., filter out certain lines).",
-        "height": 400,
-        "width": 260,
-        "color": 7
-      },
-      "id": "fa1f0ac7-b628-4e66-aa59-6e055ba2c0ae",
-      "name": "scirpt Note1",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1060,
-        -40
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "jsCode": "// Combine all \"text\" fields from the content array into one string\nlet script = '';\n\n// Loop through all input items\nfor (const item of items) {\n  if (item.json.content && Array.isArray(item.json.content)) {\n    for (const segment of item.json.content) {\n      if (segment.text) {\n        script += segment.text + ' ';\n      }\n    }\n  }\n}\n\nscript = script.trim();\n\nreturn [\n  {\n    json: {\n      script\n    }\n  }\n];\n"
-      },
-      "id": "ea9c5adf-bf92-4184-8751-d908e71e48f1",
-      "name": "Combine into one transcript",
-      "type": "n8n-nodes-base.code",
-      "position": [
-        1140,
-        180
-      ],
-      "typeVersion": 2
     },
     {
       "parameters": {
         "title": "={{ $('Get YouTube Metadata from video ID').item.json.snippet.title }}",
         "additionalFields": {
-          "content": "={{ $('Get YouTube Metadata from video ID').item.json.player.embedHtml }}\n\n{{ $json.message.content }}",
+          "content": "={{ $('Get YouTube Metadata from video ID').item.json.player.embedHtml }}\n\n{{ $json.combinedTranscript }}",
           "status": "draft"
         }
       },
       "type": "n8n-nodes-base.wordpress",
       "typeVersion": 1,
       "position": [
-        1760,
-        180
+        2048,
+        -176
       ],
-      "id": "8ee40661-8949-4acb-a618-1439af978ad9",
+      "id": "092af208-1be1-4b7b-aa18-6293830b98a0",
       "name": "Wordpress",
       "credentials": {
         "wordpressApi": {
           "id": "lFYyN14RBwz0R8uh",
-          "name": "Wordpress account 12"
+          "name": "Joaquin's Wordpress account"
         }
       }
     },
@@ -130,27 +100,27 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -100,
-        -180
+        -320,
+        -544
       ],
       "typeVersion": 1,
-      "id": "0ccf9166-e434-49bf-b472-f08dd98d2884",
+      "id": "42efeb81-d591-4acd-aedb-38f3c450c832",
       "name": "Sticky Note"
     },
     {
       "parameters": {
         "content": "## Transcription flow\n",
         "height": 560,
-        "width": 900,
+        "width": 1220,
         "color": 6
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        740,
-        -180
+        528,
+        -720
       ],
       "typeVersion": 1,
-      "id": "497aed06-59b2-44cd-99c1-f835511dca75",
+      "id": "ff23f312-401e-4874-ab50-68584661dfc4",
       "name": "Sticky Note2"
     },
     {
@@ -167,12 +137,12 @@
         },
         "options": {}
       },
-      "id": "a3db3383-112f-49d5-83c7-4cb5795643af",
+      "id": "ca141769-4043-493f-ae17-0938f28ab314",
       "name": "Get transcription from Supadata API",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        840,
-        180
+        624,
+        -368
       ],
       "typeVersion": 4.2
     },
@@ -185,10 +155,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        0,
-        180
+        -224,
+        -176
       ],
-      "id": "2b88430c-b11c-4796-9ac5-b48b8600e504",
+      "id": "13071495-def1-4a0a-987d-84bb45954240",
       "name": "Retrieve URL via POST request",
       "webhookId": "493ec790-6eeb-40fa-8a23-5bee203f2626"
     },
@@ -199,10 +169,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        180
+        32,
+        -176
       ],
-      "id": "19c61fca-10c8-4ef4-a2e4-0c39205ab391",
+      "id": "4f5749bb-8382-443e-9503-37b1cebc8e33",
       "name": "Extract video ID from URL"
     },
     {
@@ -212,12 +182,12 @@
         "videoId": "={{ $json.videoId }}",
         "options": {}
       },
-      "id": "2c22a18d-bc14-4fb6-93ff-e4973fa1f060",
+      "id": "ce52cc8e-bad5-4639-8cc4-cbca602bb711",
       "name": "Get YouTube Metadata from video ID",
       "type": "n8n-nodes-base.youTube",
       "position": [
-        480,
-        180
+        272,
+        -176
       ],
       "typeVersion": 1,
       "credentials": {
@@ -229,82 +199,116 @@
     },
     {
       "parameters": {
-        "content": "**YouTube API** \n\nCalls the YouTube API to get video metadata.\n\n**How to change:** Update the credentials to the desired YouTube account.",
+        "content": "🎥 **YouTube API** \n\nCalls the YouTube API to get video metadata.\n\n**How to change:** Update the credentials to the desired YouTube account.",
         "height": 400,
         "width": 260,
         "color": 7
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        400,
-        -40
+        192,
+        -400
       ],
       "typeVersion": 1,
-      "id": "3a5487a9-dce9-48b6-99aa-e9c4eca0fc57",
+      "id": "00144c3e-c43d-4c03-ad9a-b92ffd3de8f4",
       "name": "Sticky Note3"
     },
     {
       "parameters": {
-        "content": "**GPT-3.5 Turbo**\n\nSends transcript to GPT-3.5 Turbo for formatting.\n\n**How to change:** Update the credentials to the desired OpenAI account.",
+        "content": "🖥️ **GPT-3.5 Turbo**\n\nSends transcript to GPT-3.5 Turbo for formatting.\n\n**How to change:** Update the credentials to the desired OpenAI account.",
         "height": 400,
         "width": 260,
         "color": 7
       },
-      "id": "07e05617-901a-463c-9bd1-05da9d3ad5ba",
+      "id": "a7d93e9a-85f5-4efd-b696-bc308f787501",
       "name": "scirpt Note",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1360,
-        -40
+        1152,
+        -576
       ],
       "typeVersion": 1
     },
     {
       "parameters": {
-        "content": "**POST Endpoint** \n\nWaits for a post request to begin service.\n\n**Format:** \n{\n    \"url\": \"[ENTER_YOUTUBE_URL]\"\n}",
+        "content": "🚩 **POST Endpoint** \n\nWaits for a post request to begin service.\n\n**Format:** \n{\n    \"url\": \"[ENTER_YOUTUBE_URL]\"\n}",
         "height": 400,
         "width": 260,
         "color": 7
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -80,
-        -40
+        -304,
+        -400
       ],
       "typeVersion": 1,
-      "id": "b338b515-e8bb-4024-9feb-be13f011d4d0",
+      "id": "580774ec-299b-44ad-8048-ac08880457bd",
       "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $input.first().json.content;\n\n// Combine all the segments into one big text blob\nlet fullText = content.map(item => item.text).join(' ');\n\n// Rough sentence tokenizer\nconst sentences = fullText.match(/[^\\.!\\?]+[\\.!\\?]+/g) || [];\n\nconst chunks = [];\nlet currentChunk = '';\nlet tokenEstimate = 0;\n\nfor (const sentence of sentences) {\n  const sentenceTokenEstimate = Math.ceil(sentence.split(' ').length * 1.3);\n  if (tokenEstimate + sentenceTokenEstimate > 3000) {\n    chunks.push(currentChunk.trim());\n    currentChunk = sentence + ' ';\n    tokenEstimate = sentenceTokenEstimate;\n  } else {\n    currentChunk += sentence + ' ';\n    tokenEstimate += sentenceTokenEstimate;\n  }\n}\nif (currentChunk.trim()) {\n  chunks.push(currentChunk.trim());\n}\n\nreturn chunks.map(chunk => ({ chunk }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        -368
+      ],
+      "id": "120319a6-e254-4f0d-9968-71f1c72ba327",
+      "name": "Break transcript into chunks"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet combinedTranscript = '';\nfor (const item of $input.all()) {\n  combinedTranscript += item.json.message.content;\n  combinedTranscript += '\\n \\n'\n}\n\nreturn [{ json: { combinedTranscript: combinedTranscript } }]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -368
+      ],
+      "id": "68f7a6c8-8aa1-40f0-9c7e-5a04ade4d53d",
+      "name": "Combine formatted chunks into one transcript"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1840,
+        -176
+      ],
+      "id": "d468c6d5-7e99-4c40-9a8a-48be9e5103d8",
+      "name": "Merge YT and transcript outputs"
     }
   ],
-  "pinData": {},
   "connections": {
     "OpenAI": {
       "main": [
         [
           {
-            "node": "Wordpress",
+            "node": "Combine formatted chunks into one transcript",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Combine into one transcript": {
+    "Wordpress": {
       "main": [
-        [
-          {
-            "node": "OpenAI",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Get transcription from Supadata API": {
       "main": [
         [
           {
-            "node": "Combine into one transcript",
+            "node": "Break transcript into chunks",
             "type": "main",
             "index": 0
           }
@@ -340,18 +344,52 @@
             "node": "Get transcription from Supadata API",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Merge YT and transcript outputs",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Break transcript into chunks": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine formatted chunks into one transcript": {
+      "main": [
+        [
+          {
+            "node": "Merge YT and transcript outputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge YT and transcript outputs": {
+      "main": [
+        [
+          {
+            "node": "Wordpress",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "",
+  "pinData": {},
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "f318f1eeb582bef69a56797ad1f28184a54cfe51b0e461ee190c5740946ea07e"
-  },
-  "tags": []
+  }
 }
