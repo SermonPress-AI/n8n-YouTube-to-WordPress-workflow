@@ -1,6 +1,6 @@
 # 📡 YouTube to WordPress Workflow (n8n Workflow)
 
-This repository contains a no-code/low-code workflow built with **n8n** as part of my internship. The goal is to automate a **YouTube-to-WordPress content publishing pipeline** for sermons or devotional media — reducing manual tasks, improving turnaround time, and increasing consistency across platforms.
+This repository contains a no-code/low-code workflow built with **n8n**. The goal is to automate a **YouTube-to-WordPress content publishing pipeline** for sermons or devotional media — reducing manual tasks, improving turnaround time, and increasing consistency across platforms.
 
 <img width="2229" height="943" alt="yt-to-wp-1" src="https://github.com/user-attachments/assets/79213ea2-f960-4535-906b-18a9a564cc1d" />
 
