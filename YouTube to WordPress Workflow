@@ -1,12 +1,224 @@
 {
+  "name": "YouTube to WordPress Workflow",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Wordpress flow\n1. Merge Transcript and Video metadata\n2. Create WP draft\n3. Update Google Sheet to include the processed videos",
+        "height": 752,
+        "width": 672,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3632,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "397f6948-a824-4228-9dc3-a9be7deca42d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## YouTube Metadata flow\n1. Trigger at 8AM every day\n2. Get channel ids for each client\n3. Get last 3 videos uploaded from each client\n4. Check to see which videos have already been worked on\n5. Filter list to only include new videos\n6. Split the list of videos to separate items for processing\n7. For each new video, get the metadata from YT API for the WP post",
+        "height": 752,
+        "width": 1692,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        608,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "7fea89da-ba8d-4d94-a91e-214327a1fdc1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Transcription flow\n1. Send video to **Supadata API** to generate transcript\n2. Split transcript into chunks for processing\n3. Send chunks to GPT-4o for formatting\n4. Combine formatted chunks into one transcript",
+        "height": 752,
+        "width": 1220,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2352,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "988be8ac-08d6-439e-80d5-9a8222f3af6f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.supadata.ai/v1/transcript?url=https://youtu.be/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "[SUPADATA_API_KEY]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "23da729f-1f58-4671-a79f-d68c43e6cbf2",
+      "name": "Get transcription from Supadata API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2448,
+        448
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.uniqueYouTubeVideoIds }}",
+        "options": {}
+      },
+      "id": "f77f791d-8176-48d9-9fb5-9f7bab2c6f29",
+      "name": "Get YouTube Metadata from video ID",
+      "type": "n8n-nodes-base.youTube",
+      "position": [
+        2096,
+        640
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "lSggnTPzpXWI1eoA",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $input.first().json.content;\n\n// Combine all the segments into one big text blob\nlet fullText = content.map(item => item.text).join(' ');\n\n// Rough sentence tokenizer\nconst sentences = fullText.match(/[^\\.!\\?]+[\\.!\\?]+/g) || [];\n\nconst chunks = [];\nlet currentChunk = '';\nlet tokenEstimate = 0;\n\nfor (const sentence of sentences) {\n  const sentenceTokenEstimate = Math.ceil(sentence.split(' ').length * 1.3);\n  if (tokenEstimate + sentenceTokenEstimate > 3000) {\n    chunks.push(currentChunk.trim());\n    currentChunk = sentence + ' ';\n    tokenEstimate = sentenceTokenEstimate;\n  } else {\n    currentChunk += sentence + ' ';\n    tokenEstimate += sentenceTokenEstimate;\n  }\n}\nif (currentChunk.trim()) {\n  chunks.push(currentChunk.trim());\n}\n\nreturn chunks.map(chunk => ({ chunk }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2752,
+        448
+      ],
+      "id": "df88e2ab-f227-405d-9d51-4cf771e53f01",
+      "name": "Break transcript into chunks"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet combinedTranscript = '';\nfor (const item of $input.all()) {\n  combinedTranscript += item.json.message.content;\n  combinedTranscript += '\\n \\n'\n}\n\nreturn [{ json: { combinedTranscript: combinedTranscript } }]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3408,
+        448
+      ],
+      "id": "1b53f796-dcbe-4091-b73d-df4fb5e97801",
+      "name": "Combine formatted chunks into one transcript"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3680,
+        640
+      ],
+      "id": "a0ca0cf7-2ab2-4ab0-8c53-e40664144087",
+      "name": "Merge YT and transcript outputs"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1jG8hIyoTv5PqxXTOOSxH3qmF8nvzbCX5ttmMGAjRcO8",
+          "mode": "list",
+          "cachedResultName": "YT_to_WP",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEETS_URL_HERE"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 210377709,
+          "mode": "list",
+          "cachedResultName": "Sermons",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEETS_URL_HERE"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "video_id": "={{ $('Split Out').item.json.uniqueYouTubeVideoIds }}",
+            "date": "={{ $now.format('MM-dd-yyyy') }}",
+            "id": "==ROW()-1"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_id",
+              "displayName": "video_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4080,
+        640
+      ],
+      "id": "108c3c16-65e0-4c84-9630-299c757622ea",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uEqMp9SuO2yPeg7C",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
     {
       "parameters": {
         "modelId": {
           "__rl": true,
-          "value": "gpt-3.5-turbo",
+          "value": "gpt-4o-mini",
           "mode": "list",
-          "cachedResultName": "GPT-3.5-TURBO"
+          "cachedResultName": "GPT-4O-MINI"
         },
         "messages": {
           "values": [
@@ -24,49 +236,164 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        1152,
-        -368
+        2992,
+        448
       ],
-      "id": "8389f332-7f37-466e-a1fb-9b8731aa7f6b",
-      "name": "OpenAI",
+      "id": "69382de6-cc13-4f9f-a89f-e89a8cef02d7",
+      "name": "Format Transcript",
       "credentials": {
         "openAiApi": {
           "id": "uHhM3GMtCxg9mo7L",
-          "name": "5MT n8n Sermon Publishing Workflow OpenAI Key"
+          "name": "OpenAI Key"
         }
       }
     },
     {
       "parameters": {
-        "content": "## Wordpress flow\n",
-        "height": 560,
-        "width": 400,
-        "color": 5
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
       },
-      "type": "n8n-nodes-base.stickyNote",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
       "position": [
-        1808,
-        -544
+        656,
+        640
       ],
-      "typeVersion": 1,
-      "id": "62c13f22-29cf-42ca-a6cc-11bbdb3f5bac",
-      "name": "Sticky Note1"
+      "id": "4f652057-65c2-46f9-9ef1-ef496b36fd84",
+      "name": "Everyday at 8AM, Trigger Workflow"
     },
     {
       "parameters": {
-        "content": "📝 **Supadata API**\n\nCalls the Supadata API to get the transcript for each video.\n\n**How to change:** Update the API URL or key if the service changes. Modify request headers or parameters for other APIs.",
-        "height": 400,
-        "width": 260,
-        "color": 7
+        "documentId": {
+          "__rl": true,
+          "value": "1jG8hIyoTv5PqxXTOOSxH3qmF8nvzbCX5ttmMGAjRcO8",
+          "mode": "list",
+          "cachedResultName": "YT_to_WP",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEETS_URL_HERE"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Clients",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEETS_URL_HERE"
+        },
+        "options": {}
       },
-      "id": "711858cd-4e14-4c43-8ee4-5d15ea78990c",
-      "name": "supadata Note1",
-      "type": "n8n-nodes-base.stickyNote",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
       "position": [
-        544,
-        -576
+        896,
+        640
       ],
-      "typeVersion": 1
+      "id": "08b8861f-752a-4162-9686-c85c761f29fc",
+      "name": "For each client, extract YT channel_id",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uEqMp9SuO2yPeg7C",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "limit": 3,
+        "filters": {
+          "channelId": "={{ $json.youtube_channel_id }}",
+          "publishedAfter": "={{ $json.service_start_date.toDateTime() }}"
+        },
+        "options": {
+          "order": "date"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        640
+      ],
+      "id": "2d248b35-401c-46f2-870f-b77ac1787f50",
+      "name": "Get last 3 videos from each client",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "lSggnTPzpXWI1eoA",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1jG8hIyoTv5PqxXTOOSxH3qmF8nvzbCX5ttmMGAjRcO8",
+          "mode": "list",
+          "cachedResultName": "YT_to_WP",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEETS_URL_HERE"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 210377709,
+          "mode": "list",
+          "cachedResultName": "Sermons",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEETS_URL_HERE"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "video_id",
+              "lookupValue": "={{ $json.id.videoId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1408,
+        640
+      ],
+      "id": "894b058b-30f5-40f4-8e41-b2caa6c763a5",
+      "name": "Check for videos already used",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uEqMp9SuO2yPeg7C",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const googleSheetsData = $input.all().map((item) => item.json);\nconst youTubeData = $(\"Get last 3 videos from each client\")\n  .all()\n  .map((item) => item.json);\n\nconst googleSheetsVideoIds = googleSheetsData.map((item) => item.video_id);\n\nconst uniqueYouTubeVideoIds = youTubeData\n  .filter((item) => !googleSheetsVideoIds.includes(item.id.videoId))\n  .map((item) => item.id.videoId);\n\nreturn { uniqueYouTubeVideoIds };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1632,
+        640
+      ],
+      "id": "b92cfa52-92c5-4b9e-8702-d8dacc0fb805",
+      "name": "Filter for new videos"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "uniqueYouTubeVideoIds",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1856,
+        640
+      ],
+      "id": "a891b3ea-ebe0-4723-b7a8-5f4a82be0d98",
+      "name": "Split Out"
     },
     {
       "parameters": {
@@ -79,258 +406,40 @@
       "type": "n8n-nodes-base.wordpress",
       "typeVersion": 1,
       "position": [
-        2048,
-        -176
+        3888,
+        640
       ],
-      "id": "092af208-1be1-4b7b-aa18-6293830b98a0",
-      "name": "Wordpress",
+      "id": "38a7fbf9-f17b-4fef-8a57-7b372748f1aa",
+      "name": "Create WP draft",
       "credentials": {
         "wordpressApi": {
           "id": "lFYyN14RBwz0R8uh",
-          "name": "Joaquin's Wordpress account"
+          "name": "Wordpress account"
         }
       }
     },
     {
       "parameters": {
-        "content": "## YouTube Metadata flow\n",
-        "height": 560,
-        "width": 780,
-        "color": 4
+        "content": "# Onboarding Tasks\n\n## 1. Create Google Sheets for Client tracking\n\nRECOMMENDATION:\n2 tables (Clients & Sermons)\n\nClients table:\n| id | client | youtube_channel_link | youtube_channel_id | service_start_date |\n\nSermons table:\n| id | video_id | date |\n\n## 2. Create/connect API accounts\n\nIn total, there are 5 accounts you need for this workflow:\n1. [Google Sheets](https://developers.google.com/workspace/sheets)\n2. [YouTube API](https://developers.google.com/youtube)\n3. [Supadata API](https://supadata.ai/)\n4. [OpenAI API](https://openai.com/)\n5. [WordPress API](https://developer.wordpress.org/rest-api/)\n\n\nIf you already have these accounts, simply create credentials for n8n.\n\n**Note: If you run into an error when executing the workflow, you may need to refresh your credentials for the node that isn't working.**\n\n## 3. Run workflow!\n\nAfter everything is set up, test the workflow out! If there are any errors, feel free to reach out for assistance.\n\n## 4. Maintain the workflow\n\nWith AI models advancing quickly, there may be newer/better models to use for paragraph formatting!\n\nThe current workflow uses GPT-4o *(updated 08/17/2025)*, which is quite slow at the moment and is the main bottleneck of the workflow.\n\nThe other nodes should complete ~20s or less.",
+        "height": 992,
+        "width": 640
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -320,
-        -544
+        -176,
+        -144
       ],
       "typeVersion": 1,
-      "id": "42efeb81-d591-4acd-aedb-38f3c450c832",
-      "name": "Sticky Note"
-    },
-    {
-      "parameters": {
-        "content": "## Transcription flow\n",
-        "height": 560,
-        "width": 1220,
-        "color": 6
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        528,
-        -720
-      ],
-      "typeVersion": 1,
-      "id": "ff23f312-401e-4874-ab50-68584661dfc4",
-      "name": "Sticky Note2"
-    },
-    {
-      "parameters": {
-        "url": "=https://api.supadata.ai/v1/transcript?url=https://youtu.be/{{ $json.id }}",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "x-api-key",
-              "value": "[SUPADATA_API_KEY]"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "ca141769-4043-493f-ae17-0938f28ab314",
-      "name": "Get transcription from Supadata API",
-      "type": "n8n-nodes-base.httpRequest",
-      "position": [
-        624,
-        -368
-      ],
-      "typeVersion": 4.2
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "youtube-to-wp",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        -224,
-        -176
-      ],
-      "id": "13071495-def1-4a0a-987d-84bb45954240",
-      "name": "Retrieve URL via POST request",
-      "webhookId": "493ec790-6eeb-40fa-8a23-5bee203f2626"
-    },
-    {
-      "parameters": {
-        "jsCode": "const input = $input.first().json.body.url;\nconst regex = /(?:v=|\\/)([0-9A-Za-z_-]{11})(?:&|$)/;\nconst match = input.match(regex);\n\nif (!match || !match[1]) {\n  throw new Error(\"Invalid YouTube link. Couldn't extract video ID.\");\n}\n\nreturn [{ videoId: match[1] }];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        32,
-        -176
-      ],
-      "id": "4f5749bb-8382-443e-9503-37b1cebc8e33",
-      "name": "Extract video ID from URL"
-    },
-    {
-      "parameters": {
-        "resource": "video",
-        "operation": "get",
-        "videoId": "={{ $json.videoId }}",
-        "options": {}
-      },
-      "id": "ce52cc8e-bad5-4639-8cc4-cbca602bb711",
-      "name": "Get YouTube Metadata from video ID",
-      "type": "n8n-nodes-base.youTube",
-      "position": [
-        272,
-        -176
-      ],
-      "typeVersion": 1,
-      "credentials": {
-        "youTubeOAuth2Api": {
-          "id": "lSggnTPzpXWI1eoA",
-          "name": "YouTube account 3"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "content": "🎥 **YouTube API** \n\nCalls the YouTube API to get video metadata.\n\n**How to change:** Update the credentials to the desired YouTube account.",
-        "height": 400,
-        "width": 260,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        192,
-        -400
-      ],
-      "typeVersion": 1,
-      "id": "00144c3e-c43d-4c03-ad9a-b92ffd3de8f4",
-      "name": "Sticky Note3"
-    },
-    {
-      "parameters": {
-        "content": "🖥️ **GPT-3.5 Turbo**\n\nSends transcript to GPT-3.5 Turbo for formatting.\n\n**How to change:** Update the credentials to the desired OpenAI account.",
-        "height": 400,
-        "width": 260,
-        "color": 7
-      },
-      "id": "a7d93e9a-85f5-4efd-b696-bc308f787501",
-      "name": "scirpt Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1152,
-        -576
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "content": "🚩 **POST Endpoint** \n\nWaits for a post request to begin service.\n\n**Format:** \n{\n    \"url\": \"[ENTER_YOUTUBE_URL]\"\n}",
-        "height": 400,
-        "width": 260,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -304,
-        -400
-      ],
-      "typeVersion": 1,
-      "id": "580774ec-299b-44ad-8048-ac08880457bd",
-      "name": "Sticky Note4"
-    },
-    {
-      "parameters": {
-        "jsCode": "const content = $input.first().json.content;\n\n// Combine all the segments into one big text blob\nlet fullText = content.map(item => item.text).join(' ');\n\n// Rough sentence tokenizer\nconst sentences = fullText.match(/[^\\.!\\?]+[\\.!\\?]+/g) || [];\n\nconst chunks = [];\nlet currentChunk = '';\nlet tokenEstimate = 0;\n\nfor (const sentence of sentences) {\n  const sentenceTokenEstimate = Math.ceil(sentence.split(' ').length * 1.3);\n  if (tokenEstimate + sentenceTokenEstimate > 3000) {\n    chunks.push(currentChunk.trim());\n    currentChunk = sentence + ' ';\n    tokenEstimate = sentenceTokenEstimate;\n  } else {\n    currentChunk += sentence + ' ';\n    tokenEstimate += sentenceTokenEstimate;\n  }\n}\nif (currentChunk.trim()) {\n  chunks.push(currentChunk.trim());\n}\n\nreturn chunks.map(chunk => ({ chunk }));"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        912,
-        -368
-      ],
-      "id": "120319a6-e254-4f0d-9968-71f1c72ba327",
-      "name": "Break transcript into chunks"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet combinedTranscript = '';\nfor (const item of $input.all()) {\n  combinedTranscript += item.json.message.content;\n  combinedTranscript += '\\n \\n'\n}\n\nreturn [{ json: { combinedTranscript: combinedTranscript } }]"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1568,
-        -368
-      ],
-      "id": "68f7a6c8-8aa1-40f0-9c7e-5a04ade4d53d",
-      "name": "Combine formatted chunks into one transcript"
-    },
-    {
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        1840,
-        -176
-      ],
-      "id": "d468c6d5-7e99-4c40-9a8a-48be9e5103d8",
-      "name": "Merge YT and transcript outputs"
+      "id": "9e28cc93-ebe4-4f14-a46d-46b558a084b2",
+      "name": "Sticky Note5"
     }
   ],
   "connections": {
-    "OpenAI": {
-      "main": [
-        [
-          {
-            "node": "Combine formatted chunks into one transcript",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wordpress": {
-      "main": [
-        []
-      ]
-    },
     "Get transcription from Supadata API": {
       "main": [
         [
           {
             "node": "Break transcript into chunks",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Retrieve URL via POST request": {
-      "main": [
-        [
-          {
-            "node": "Extract video ID from URL",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract video ID from URL": {
-      "main": [
-        [
-          {
-            "node": "Get YouTube Metadata from video ID",
             "type": "main",
             "index": 0
           }
@@ -357,7 +466,7 @@
       "main": [
         [
           {
-            "node": "OpenAI",
+            "node": "Format Transcript",
             "type": "main",
             "index": 0
           }
@@ -379,7 +488,95 @@
       "main": [
         [
           {
-            "node": "Wordpress",
+            "node": "Create WP draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Transcript": {
+      "main": [
+        [
+          {
+            "node": "Combine formatted chunks into one transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Everyday at 8AM, Trigger Workflow": {
+      "main": [
+        [
+          {
+            "node": "For each client, extract YT channel_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "For each client, extract YT channel_id": {
+      "main": [
+        [
+          {
+            "node": "Get last 3 videos from each client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get last 3 videos from each client": {
+      "main": [
+        [
+          {
+            "node": "Check for videos already used",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for videos already used": {
+      "main": [
+        [
+          {
+            "node": "Filter for new videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter for new videos": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Get YouTube Metadata from video ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create WP draft": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
             "type": "main",
             "index": 0
           }
@@ -388,8 +585,13 @@
     }
   },
   "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "f318f1eeb582bef69a56797ad1f28184a54cfe51b0e461ee190c5740946ea07e"
-  }
+  },
+  "tags": []
 }
