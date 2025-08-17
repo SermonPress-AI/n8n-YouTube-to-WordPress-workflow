@@ -6,7 +6,7 @@ This repository contains an **n8n workflow** for automating the transcription an
 
 ## Quick Links:
 - [Features](#-features)
-- [Setup Instructions](-setup-instructions)
+- [Setup Instructions](#%EF%B8%8F-setup-instructions)
 - [Usage](#-usage)
 - [Cost Considerations](#-cost-considerations)
 - [Security Notes](#-security-notes)
